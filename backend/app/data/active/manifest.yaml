@@ -1,0 +1,9 @@
+ruleset_id: nba2k27-unverified
+game: nba2k27
+observed_at: null
+source_app_version: unknown
+tuning_version: unknown
+verified_by: []
+coverage: []
+notes:
+  - No verified NBA 2K27 rules are loaded. Public build recommendations are disabled.

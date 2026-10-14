@@ -1,0 +1,1941 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Unofficial NBA 2K27 Build Optimizer API",
+    "description": "Unofficial NBA 2K27 build planning tool. Not affiliated with or endorsed by 2K or the NBA. A build is recommended only when every mechanic it depends on is verified.",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/health/live": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Live",
+        "operationId": "live_health_live_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthLive"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health/ready": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Ready",
+        "operationId": "ready_health_ready_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthReady"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthReady"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/metadata": {
+      "get": {
+        "tags": [
+          "metadata"
+        ],
+        "summary": "Metadata",
+        "operationId": "metadata_api_v1_metadata_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetadataResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/validate": {
+      "post": {
+        "tags": [
+          "validate"
+        ],
+        "summary": "Validate Build",
+        "operationId": "validate_build_api_v1_validate_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OptimizeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidateResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/optimize": {
+      "post": {
+        "tags": [
+          "optimize"
+        ],
+        "summary": "Optimize Build",
+        "operationId": "optimize_build_api_v1_optimize_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OptimizeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/FeasibleOptimizeResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InconclusiveOptimizeResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InfeasibleOptimizeResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/UnsupportedOptimizeResponse"
+                    }
+                  ],
+                  "title": "Response Optimize Build Api V1 Optimize Post",
+                  "discriminator": {
+                    "propertyName": "status",
+                    "mapping": {
+                      "complete_proven": "#/components/schemas/FeasibleOptimizeResponse",
+                      "partial_feasible": "#/components/schemas/FeasibleOptimizeResponse",
+                      "no_feasible_found_in_budget": "#/components/schemas/InconclusiveOptimizeResponse",
+                      "infeasible_proven": "#/components/schemas/InfeasibleOptimizeResponse",
+                      "unsupported": "#/components/schemas/UnsupportedOptimizeResponse"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/shared-builds": {
+      "post": {
+        "tags": [
+          "shares"
+        ],
+        "summary": "Create Share",
+        "operationId": "create_share_api_v1_shared_builds_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShareCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "501": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/shared-builds/{share_id}": {
+      "get": {
+        "tags": [
+          "shares"
+        ],
+        "summary": "Read Share",
+        "operationId": "read_share_api_v1_shared_builds__share_id__get",
+        "parameters": [
+          {
+            "name": "share_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Share Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "501": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Implemented"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          }
+        }
+      }
+    },
+    "/api/v1/issue-reports": {
+      "post": {
+        "tags": [
+          "issues"
+        ],
+        "summary": "Create Issue Report",
+        "operationId": "create_issue_report_api_v1_issue_reports_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IssueReportRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "501": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AttributeDescriptor": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "category": {
+            "type": "string",
+            "title": "Category"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "label",
+          "category"
+        ],
+        "title": "AttributeDescriptor",
+        "description": "Present so clients have a typed attribute dictionary. Empty until rules are verified."
+      },
+      "AttributeRating": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,63}$",
+            "title": "Id"
+          },
+          "rating": {
+            "type": "integer",
+            "maximum": 150.0,
+            "minimum": 0.0,
+            "title": "Rating"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "rating"
+        ],
+        "title": "AttributeRating"
+      },
+      "AttributeTarget": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,63}$",
+            "title": "Id"
+          },
+          "target": {
+            "type": "integer",
+            "maximum": 150.0,
+            "minimum": 0.0,
+            "title": "Target"
+          },
+          "importance": {
+            "$ref": "#/components/schemas/Importance"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "target",
+          "importance"
+        ],
+        "title": "AttributeTarget"
+      },
+      "BadgeRequest": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,63}$",
+            "title": "Id"
+          },
+          "minimum_tier": {
+            "$ref": "#/components/schemas/BadgeTier"
+          },
+          "importance": {
+            "$ref": "#/components/schemas/Importance"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "minimum_tier",
+          "importance"
+        ],
+        "title": "BadgeRequest"
+      },
+      "BadgeTier": {
+        "type": "string",
+        "enum": [
+          "bronze",
+          "silver",
+          "gold",
+          "hall_of_fame"
+        ],
+        "title": "BadgeTier",
+        "description": "Request vocabulary from the product contract, not a verified eligibility table."
+      },
+      "BodyInput": {
+        "properties": {
+          "position": {
+            "$ref": "#/components/schemas/LockedPosition"
+          },
+          "height_in": {
+            "$ref": "#/components/schemas/LockedInches"
+          },
+          "weight_lb": {
+            "$ref": "#/components/schemas/LockedPounds"
+          },
+          "wingspan_in": {
+            "$ref": "#/components/schemas/LockedInches"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "BodyInput"
+      },
+      "BuildMeasurements": {
+        "properties": {
+          "position": {
+            "$ref": "#/components/schemas/Position"
+          },
+          "height_in": {
+            "type": "integer",
+            "maximum": 150.0,
+            "minimum": 1.0,
+            "title": "Height In"
+          },
+          "weight_lb": {
+            "type": "integer",
+            "maximum": 1000.0,
+            "minimum": 1.0,
+            "title": "Weight Lb"
+          },
+          "wingspan_in": {
+            "type": "integer",
+            "maximum": 150.0,
+            "minimum": 1.0,
+            "title": "Wingspan In"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "position",
+          "height_in",
+          "weight_lb",
+          "wingspan_in"
+        ],
+        "title": "BuildMeasurements"
+      },
+      "CacheInfo": {
+        "properties": {
+          "hit": {
+            "type": "boolean",
+            "title": "Hit"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "hit"
+        ],
+        "title": "CacheInfo"
+      },
+      "CapBreakerAllocation": {
+        "properties": {
+          "pool_id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,63}$",
+            "title": "Pool Id"
+          },
+          "attribute_id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,63}$",
+            "title": "Attribute Id"
+          },
+          "applications": {
+            "type": "integer",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Applications"
+          },
+          "rating_gain": {
+            "type": "integer",
+            "maximum": 150.0,
+            "minimum": 0.0,
+            "title": "Rating Gain"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "pool_id",
+          "attribute_id",
+          "applications",
+          "rating_gain"
+        ],
+        "title": "CapBreakerAllocation"
+      },
+      "CapBreakerInput": {
+        "properties": {
+          "pools": {
+            "items": {
+              "$ref": "#/components/schemas/CapBreakerPoolInput"
+            },
+            "type": "array",
+            "maxItems": 12,
+            "title": "Pools"
+          },
+          "reserved_total": {
+            "type": "integer",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Reserved Total",
+            "default": 0
+          },
+          "forbidden_attribute_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 64,
+            "title": "Forbidden Attribute Ids"
+          },
+          "minimum_allocations": {
+            "items": {
+              "$ref": "#/components/schemas/MinimumAllocation"
+            },
+            "type": "array",
+            "maxItems": 64,
+            "title": "Minimum Allocations"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "CapBreakerInput"
+      },
+      "CapBreakerPoolInput": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,63}$",
+            "title": "Id"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/PoolKind"
+          },
+          "category": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]{0,63}$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category"
+          },
+          "available": {
+            "type": "integer",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Available"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "kind",
+          "available"
+        ],
+        "title": "CapBreakerPoolInput"
+      },
+      "CoverageReport": {
+        "properties": {
+          "supported": {
+            "type": "boolean",
+            "title": "Supported"
+          },
+          "notes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Notes"
+          },
+          "missing_mechanics": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Missing Mechanics"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "supported",
+          "notes",
+          "missing_mechanics"
+        ],
+        "title": "CoverageReport"
+      },
+      "DeviationNote": {
+        "properties": {
+          "attribute_id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,63}$",
+            "title": "Attribute Id"
+          },
+          "requested": {
+            "type": "integer",
+            "maximum": 150.0,
+            "minimum": 0.0,
+            "title": "Requested"
+          },
+          "achieved": {
+            "type": "integer",
+            "maximum": 150.0,
+            "minimum": 0.0,
+            "title": "Achieved"
+          },
+          "message": {
+            "type": "string",
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Message"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "attribute_id",
+          "requested",
+          "achieved",
+          "message"
+        ],
+        "title": "DeviationNote"
+      },
+      "EligibleBadge": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,63}$",
+            "title": "Id"
+          },
+          "highest_tier": {
+            "$ref": "#/components/schemas/BadgeTier"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "highest_tier"
+        ],
+        "title": "EligibleBadge"
+      },
+      "EligibleUnlock": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,63}$",
+            "title": "Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "title": "EligibleUnlock"
+      },
+      "ErrorDetail": {
+        "properties": {
+          "field": {
+            "type": "string",
+            "title": "Field"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "field",
+          "code",
+          "message"
+        ],
+        "title": "ErrorDetail"
+      },
+      "ErrorResponse": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          },
+          "details": {
+            "items": {
+              "$ref": "#/components/schemas/ErrorDetail"
+            },
+            "type": "array",
+            "title": "Details"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "message",
+          "request_id"
+        ],
+        "title": "ErrorResponse"
+      },
+      "FeasibleOptimizeResponse": {
+        "properties": {
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          },
+          "ruleset_id": {
+            "type": "string",
+            "title": "Ruleset Id"
+          },
+          "scoring_version": {
+            "type": "string",
+            "title": "Scoring Version"
+          },
+          "optimizer_version": {
+            "type": "string",
+            "title": "Optimizer Version"
+          },
+          "elapsed_ms": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Elapsed Ms"
+          },
+          "coverage": {
+            "$ref": "#/components/schemas/CoverageReport"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          },
+          "cache": {
+            "$ref": "#/components/schemas/CacheInfo"
+          },
+          "recommendations": {
+            "$ref": "#/components/schemas/RecommendationSet"
+          },
+          "unmet_requirements": {
+            "items": {
+              "$ref": "#/components/schemas/UnmetRequirement"
+            },
+            "type": "array",
+            "title": "Unmet Requirements"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "complete_proven",
+              "partial_feasible"
+            ],
+            "title": "Status"
+          },
+          "optimality_proven": {
+            "type": "boolean",
+            "title": "Optimality Proven"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "request_id",
+          "ruleset_id",
+          "scoring_version",
+          "optimizer_version",
+          "elapsed_ms",
+          "coverage",
+          "warnings",
+          "cache",
+          "status",
+          "optimality_proven"
+        ],
+        "title": "FeasibleOptimizeResponse"
+      },
+      "FieldIssue": {
+        "properties": {
+          "field": {
+            "type": "string",
+            "title": "Field"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "field",
+          "code",
+          "message"
+        ],
+        "title": "FieldIssue"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "HealthLive": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "const": "ok",
+            "title": "Status"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "title": "HealthLive"
+      },
+      "HealthReady": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "unavailable"
+            ],
+            "title": "Status"
+          },
+          "database": {
+            "type": "string",
+            "enum": [
+              "connected",
+              "unavailable"
+            ],
+            "title": "Database"
+          },
+          "rules_loaded": {
+            "type": "boolean",
+            "title": "Rules Loaded",
+            "description": "True when the active manifest parsed. This does not mean any mechanic is verified."
+          },
+          "recommendations_enabled": {
+            "type": "boolean",
+            "title": "Recommendations Enabled"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "status",
+          "database",
+          "rules_loaded",
+          "recommendations_enabled"
+        ],
+        "title": "HealthReady"
+      },
+      "Importance": {
+        "type": "string",
+        "enum": [
+          "required",
+          "prioritized",
+          "normal"
+        ],
+        "title": "Importance"
+      },
+      "InconclusiveOptimizeResponse": {
+        "properties": {
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          },
+          "ruleset_id": {
+            "type": "string",
+            "title": "Ruleset Id"
+          },
+          "scoring_version": {
+            "type": "string",
+            "title": "Scoring Version"
+          },
+          "optimizer_version": {
+            "type": "string",
+            "title": "Optimizer Version"
+          },
+          "elapsed_ms": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Elapsed Ms"
+          },
+          "coverage": {
+            "$ref": "#/components/schemas/CoverageReport"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          },
+          "cache": {
+            "$ref": "#/components/schemas/CacheInfo"
+          },
+          "recommendations": {
+            "$ref": "#/components/schemas/RecommendationSet"
+          },
+          "unmet_requirements": {
+            "items": {
+              "$ref": "#/components/schemas/UnmetRequirement"
+            },
+            "type": "array",
+            "title": "Unmet Requirements"
+          },
+          "status": {
+            "type": "string",
+            "const": "no_feasible_found_in_budget",
+            "title": "Status"
+          },
+          "optimality_proven": {
+            "type": "boolean",
+            "const": false,
+            "title": "Optimality Proven",
+            "default": false
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "request_id",
+          "ruleset_id",
+          "scoring_version",
+          "optimizer_version",
+          "elapsed_ms",
+          "coverage",
+          "warnings",
+          "cache",
+          "status"
+        ],
+        "title": "InconclusiveOptimizeResponse"
+      },
+      "InfeasibleOptimizeResponse": {
+        "properties": {
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          },
+          "ruleset_id": {
+            "type": "string",
+            "title": "Ruleset Id"
+          },
+          "scoring_version": {
+            "type": "string",
+            "title": "Scoring Version"
+          },
+          "optimizer_version": {
+            "type": "string",
+            "title": "Optimizer Version"
+          },
+          "elapsed_ms": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Elapsed Ms"
+          },
+          "coverage": {
+            "$ref": "#/components/schemas/CoverageReport"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          },
+          "cache": {
+            "$ref": "#/components/schemas/CacheInfo"
+          },
+          "recommendations": {
+            "$ref": "#/components/schemas/RecommendationSet"
+          },
+          "unmet_requirements": {
+            "items": {
+              "$ref": "#/components/schemas/UnmetRequirement"
+            },
+            "type": "array",
+            "title": "Unmet Requirements"
+          },
+          "status": {
+            "type": "string",
+            "const": "infeasible_proven",
+            "title": "Status"
+          },
+          "optimality_proven": {
+            "type": "boolean",
+            "const": true,
+            "title": "Optimality Proven",
+            "default": true
+          },
+          "conflicts": {
+            "items": {
+              "$ref": "#/components/schemas/RequirementConflict"
+            },
+            "type": "array",
+            "title": "Conflicts"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "request_id",
+          "ruleset_id",
+          "scoring_version",
+          "optimizer_version",
+          "elapsed_ms",
+          "coverage",
+          "warnings",
+          "cache",
+          "status",
+          "conflicts"
+        ],
+        "title": "InfeasibleOptimizeResponse"
+      },
+      "IssueCategory": {
+        "type": "string",
+        "enum": [
+          "incorrect_build",
+          "missed_requirement",
+          "display_problem",
+          "other"
+        ],
+        "title": "IssueCategory"
+      },
+      "IssueReportRequest": {
+        "properties": {
+          "category": {
+            "$ref": "#/components/schemas/IssueCategory"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 4000,
+            "title": "Description",
+            "default": ""
+          },
+          "share_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Share Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "category"
+        ],
+        "title": "IssueReportRequest"
+      },
+      "LockedInches": {
+        "properties": {
+          "value": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 150.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          },
+          "locked": {
+            "type": "boolean",
+            "title": "Locked",
+            "default": false
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "LockedInches",
+        "description": "Inches field. The numeric bound is an API limit, not a legal body range."
+      },
+      "LockedPosition": {
+        "properties": {
+          "value": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Position"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "locked": {
+            "type": "boolean",
+            "title": "Locked",
+            "default": false
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "LockedPosition"
+      },
+      "LockedPounds": {
+        "properties": {
+          "value": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 1000.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          },
+          "locked": {
+            "type": "boolean",
+            "title": "Locked",
+            "default": false
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "LockedPounds",
+        "description": "Pounds field. The numeric bound is an API limit, not a legal body range."
+      },
+      "MetadataResponse": {
+        "properties": {
+          "ruleset_id": {
+            "type": "string",
+            "title": "Ruleset Id"
+          },
+          "game": {
+            "type": "string",
+            "title": "Game"
+          },
+          "scoring_version": {
+            "type": "string",
+            "title": "Scoring Version"
+          },
+          "optimizer_version": {
+            "type": "string",
+            "title": "Optimizer Version"
+          },
+          "files_sha256": {
+            "type": "string",
+            "title": "Files Sha256"
+          },
+          "disclaimer": {
+            "type": "string",
+            "title": "Disclaimer"
+          },
+          "recommendations_enabled": {
+            "type": "boolean",
+            "title": "Recommendations Enabled"
+          },
+          "positions": {
+            "items": {
+              "$ref": "#/components/schemas/Position"
+            },
+            "type": "array",
+            "title": "Positions"
+          },
+          "importance_levels": {
+            "items": {
+              "$ref": "#/components/schemas/Importance"
+            },
+            "type": "array",
+            "title": "Importance Levels"
+          },
+          "playstyles": {
+            "items": {
+              "$ref": "#/components/schemas/PlaystyleOption"
+            },
+            "type": "array",
+            "title": "Playstyles"
+          },
+          "attributes": {
+            "items": {
+              "$ref": "#/components/schemas/AttributeDescriptor"
+            },
+            "type": "array",
+            "title": "Attributes"
+          },
+          "coverage": {
+            "items": {
+              "$ref": "#/components/schemas/PositionCoverage"
+            },
+            "type": "array",
+            "title": "Coverage"
+          },
+          "notes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Notes"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "ruleset_id",
+          "game",
+          "scoring_version",
+          "optimizer_version",
+          "files_sha256",
+          "disclaimer",
+          "recommendations_enabled",
+          "positions",
+          "importance_levels",
+          "playstyles",
+          "attributes",
+          "coverage"
+        ],
+        "title": "MetadataResponse"
+      },
+      "MinimumAllocation": {
+        "properties": {
+          "attribute_id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,63}$",
+            "title": "Attribute Id"
+          },
+          "count": {
+            "type": "integer",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Count"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "attribute_id",
+          "count"
+        ],
+        "title": "MinimumAllocation"
+      },
+      "OptimizeRequest": {
+        "properties": {
+          "mode": {
+            "$ref": "#/components/schemas/SearchMode",
+            "default": "generate"
+          },
+          "body": {
+            "$ref": "#/components/schemas/BodyInput"
+          },
+          "attribute_targets": {
+            "items": {
+              "$ref": "#/components/schemas/AttributeTarget"
+            },
+            "type": "array",
+            "maxItems": 64,
+            "minItems": 1,
+            "title": "Attribute Targets"
+          },
+          "cap_breakers": {
+            "$ref": "#/components/schemas/CapBreakerInput"
+          },
+          "badges": {
+            "items": {
+              "$ref": "#/components/schemas/BadgeRequest"
+            },
+            "type": "array",
+            "maxItems": 200,
+            "title": "Badges"
+          },
+          "animations": {
+            "items": {
+              "$ref": "#/components/schemas/UnlockRequest"
+            },
+            "type": "array",
+            "maxItems": 200,
+            "title": "Animations"
+          },
+          "takeovers": {
+            "items": {
+              "$ref": "#/components/schemas/UnlockRequest"
+            },
+            "type": "array",
+            "maxItems": 50,
+            "title": "Takeovers"
+          },
+          "playstyle": {
+            "type": "string",
+            "title": "Playstyle",
+            "default": "automatic"
+          },
+          "reference": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RefineReference"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "attribute_targets"
+        ],
+        "title": "OptimizeRequest"
+      },
+      "PlaystyleOption": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "label"
+        ],
+        "title": "PlaystyleOption"
+      },
+      "PoolKind": {
+        "type": "string",
+        "enum": [
+          "unrestricted",
+          "specialization"
+        ],
+        "title": "PoolKind"
+      },
+      "Position": {
+        "type": "string",
+        "enum": [
+          "PG",
+          "SG",
+          "SF",
+          "PF",
+          "C"
+        ],
+        "title": "Position"
+      },
+      "PositionCoverage": {
+        "properties": {
+          "position": {
+            "$ref": "#/components/schemas/Position"
+          },
+          "body_profiles": {
+            "$ref": "#/components/schemas/VerificationStatus"
+          },
+          "attribute_costs": {
+            "$ref": "#/components/schemas/VerificationStatus"
+          },
+          "cap_breakers": {
+            "$ref": "#/components/schemas/VerificationStatus"
+          },
+          "badge_eligibility": {
+            "$ref": "#/components/schemas/VerificationStatus"
+          },
+          "animations": {
+            "$ref": "#/components/schemas/VerificationStatus"
+          },
+          "takeovers": {
+            "$ref": "#/components/schemas/VerificationStatus"
+          },
+          "archetype_names": {
+            "$ref": "#/components/schemas/VerificationStatus"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "position",
+          "body_profiles",
+          "attribute_costs",
+          "cap_breakers",
+          "badge_eligibility",
+          "animations",
+          "takeovers",
+          "archetype_names"
+        ],
+        "title": "PositionCoverage"
+      },
+      "Recommendation": {
+        "properties": {
+          "build_id": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Build Id"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "rank": {
+            "type": "integer",
+            "maximum": 8.0,
+            "minimum": 1.0,
+            "title": "Rank"
+          },
+          "score": {
+            "type": "number",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Score"
+          },
+          "body": {
+            "$ref": "#/components/schemas/BuildMeasurements"
+          },
+          "base_attributes": {
+            "items": {
+              "$ref": "#/components/schemas/AttributeRating"
+            },
+            "type": "array",
+            "maxItems": 64,
+            "title": "Base Attributes"
+          },
+          "final_attributes": {
+            "items": {
+              "$ref": "#/components/schemas/AttributeRating"
+            },
+            "type": "array",
+            "maxItems": 64,
+            "title": "Final Attributes"
+          },
+          "cap_breaker_allocations": {
+            "items": {
+              "$ref": "#/components/schemas/CapBreakerAllocation"
+            },
+            "type": "array",
+            "maxItems": 200,
+            "title": "Cap Breaker Allocations"
+          },
+          "eligible_badges": {
+            "items": {
+              "$ref": "#/components/schemas/EligibleBadge"
+            },
+            "type": "array",
+            "maxItems": 200,
+            "title": "Eligible Badges"
+          },
+          "eligible_animations": {
+            "items": {
+              "$ref": "#/components/schemas/EligibleUnlock"
+            },
+            "type": "array",
+            "maxItems": 200,
+            "title": "Eligible Animations"
+          },
+          "eligible_takeovers": {
+            "items": {
+              "$ref": "#/components/schemas/EligibleUnlock"
+            },
+            "type": "array",
+            "maxItems": 50,
+            "title": "Eligible Takeovers"
+          },
+          "score_breakdown": {
+            "$ref": "#/components/schemas/ScoreBreakdown"
+          },
+          "deviations": {
+            "items": {
+              "$ref": "#/components/schemas/DeviationNote"
+            },
+            "type": "array",
+            "maxItems": 64,
+            "title": "Deviations"
+          },
+          "verification": {
+            "type": "string",
+            "const": "verified",
+            "title": "Verification"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "build_id",
+          "name",
+          "rank",
+          "score",
+          "body",
+          "base_attributes",
+          "final_attributes",
+          "cap_breaker_allocations",
+          "eligible_badges",
+          "eligible_animations",
+          "eligible_takeovers",
+          "score_breakdown",
+          "deviations",
+          "verification"
+        ],
+        "title": "Recommendation"
+      },
+      "RecommendationSet": {
+        "properties": {
+          "top": {
+            "items": {
+              "$ref": "#/components/schemas/Recommendation"
+            },
+            "type": "array",
+            "maxItems": 5,
+            "title": "Top"
+          },
+          "alternatives": {
+            "items": {
+              "$ref": "#/components/schemas/Recommendation"
+            },
+            "type": "array",
+            "maxItems": 3,
+            "title": "Alternatives"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "RecommendationSet"
+      },
+      "RefineReference": {
+        "properties": {
+          "body": {
+            "$ref": "#/components/schemas/BuildMeasurements"
+          },
+          "base_attributes": {
+            "items": {
+              "$ref": "#/components/schemas/AttributeRating"
+            },
+            "type": "array",
+            "maxItems": 64,
+            "minItems": 1,
+            "title": "Base Attributes"
+          },
+          "cap_breaker_allocations": {
+            "items": {
+              "$ref": "#/components/schemas/CapBreakerAllocation"
+            },
+            "type": "array",
+            "maxItems": 200,
+            "title": "Cap Breaker Allocations"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "body",
+          "base_attributes"
+        ],
+        "title": "RefineReference"
+      },
+      "RequirementConflict": {
+        "properties": {
+          "field": {
+            "type": "string",
+            "title": "Field"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "field",
+          "message"
+        ],
+        "title": "RequirementConflict"
+      },
+      "ScoreBreakdown": {
+        "properties": {
+          "scoring_version": {
+            "type": "string",
+            "title": "Scoring Version"
+          },
+          "components": {
+            "items": {
+              "$ref": "#/components/schemas/ScoreComponent"
+            },
+            "type": "array",
+            "maxItems": 32,
+            "title": "Components"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "scoring_version"
+        ],
+        "title": "ScoreBreakdown"
+      },
+      "ScoreComponent": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,63}$",
+            "title": "Id"
+          },
+          "weight": {
+            "type": "number",
+            "title": "Weight"
+          },
+          "value": {
+            "type": "number",
+            "title": "Value"
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 300,
+            "title": "Note",
+            "default": ""
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "weight",
+          "value"
+        ],
+        "title": "ScoreComponent"
+      },
+      "SearchMode": {
+        "type": "string",
+        "enum": [
+          "generate",
+          "refine"
+        ],
+        "title": "SearchMode"
+      },
+      "ShareCreateRequest": {
+        "properties": {
+          "candidate": {
+            "$ref": "#/components/schemas/Recommendation"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "candidate"
+        ],
+        "title": "ShareCreateRequest"
+      },
+      "UnlockRequest": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,63}$",
+            "title": "Id"
+          },
+          "importance": {
+            "$ref": "#/components/schemas/Importance"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "importance"
+        ],
+        "title": "UnlockRequest"
+      },
+      "UnmetRequirement": {
+        "properties": {
+          "field": {
+            "type": "string",
+            "title": "Field"
+          },
+          "requested": {
+            "type": "string",
+            "title": "Requested"
+          },
+          "achieved": {
+            "type": "string",
+            "title": "Achieved"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "field",
+          "requested",
+          "achieved",
+          "message"
+        ],
+        "title": "UnmetRequirement"
+      },
+      "UnsupportedOptimizeResponse": {
+        "properties": {
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          },
+          "ruleset_id": {
+            "type": "string",
+            "title": "Ruleset Id"
+          },
+          "scoring_version": {
+            "type": "string",
+            "title": "Scoring Version"
+          },
+          "optimizer_version": {
+            "type": "string",
+            "title": "Optimizer Version"
+          },
+          "elapsed_ms": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Elapsed Ms"
+          },
+          "coverage": {
+            "$ref": "#/components/schemas/CoverageReport"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          },
+          "cache": {
+            "$ref": "#/components/schemas/CacheInfo"
+          },
+          "recommendations": {
+            "$ref": "#/components/schemas/RecommendationSet"
+          },
+          "unmet_requirements": {
+            "items": {
+              "$ref": "#/components/schemas/UnmetRequirement"
+            },
+            "type": "array",
+            "title": "Unmet Requirements"
+          },
+          "status": {
+            "type": "string",
+            "const": "unsupported",
+            "title": "Status"
+          },
+          "optimality_proven": {
+            "type": "boolean",
+            "const": false,
+            "title": "Optimality Proven",
+            "default": false
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "request_id",
+          "ruleset_id",
+          "scoring_version",
+          "optimizer_version",
+          "elapsed_ms",
+          "coverage",
+          "warnings",
+          "cache",
+          "status"
+        ],
+        "title": "UnsupportedOptimizeResponse"
+      },
+      "ValidateResponse": {
+        "properties": {
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          },
+          "ruleset_id": {
+            "type": "string",
+            "title": "Ruleset Id"
+          },
+          "supported": {
+            "type": "boolean",
+            "title": "Supported"
+          },
+          "issues": {
+            "items": {
+              "$ref": "#/components/schemas/FieldIssue"
+            },
+            "type": "array",
+            "title": "Issues"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "request_id",
+          "ruleset_id",
+          "supported",
+          "issues",
+          "warnings"
+        ],
+        "title": "ValidateResponse"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "VerificationStatus": {
+        "type": "string",
+        "enum": [
+          "verified",
+          "needs_verification",
+          "unsupported",
+          "contradictory",
+          "retired"
+        ],
+        "title": "VerificationStatus"
+      }
+    }
+  }
+}

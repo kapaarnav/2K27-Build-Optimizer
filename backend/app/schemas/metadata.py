@@ -1,0 +1,39 @@
+from pydantic import BaseModel, ConfigDict, Field
+
+from app.domain import Importance, Position
+from app.rules.manifest import PositionCoverage
+
+
+class PlaystyleOption(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    id: str
+    label: str
+
+
+class AttributeDescriptor(BaseModel):
+    """Present so clients have a typed attribute dictionary. Empty until rules are verified."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    id: str
+    label: str
+    category: str
+
+
+class MetadataResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    ruleset_id: str
+    game: str
+    scoring_version: str
+    optimizer_version: str
+    files_sha256: str
+    disclaimer: str
+    recommendations_enabled: bool
+    positions: list[Position]
+    importance_levels: list[Importance]
+    playstyles: list[PlaystyleOption]
+    attributes: list[AttributeDescriptor]
+    coverage: list[PositionCoverage]
+    notes: list[str] = Field(default_factory=list)

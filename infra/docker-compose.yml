@@ -1,0 +1,35 @@
+name: nba2k27-build-optimizer
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: optimizer
+      POSTGRES_PASSWORD: optimizer
+      POSTGRES_DB: optimizer
+    ports:
+      # Host 5432 and 5433 are taken by local Postgres 16 and 17. The container still listens on 5432 internally.
+      - "5434:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U optimizer -d optimizer"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  api:
+    build:
+      context: ../backend
+      dockerfile: ../infra/Dockerfile.backend
+    environment:
+      DATABASE_URL: postgresql+psycopg://optimizer:optimizer@db:5432/optimizer
+      CORS_ORIGINS: http://localhost:5173
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:

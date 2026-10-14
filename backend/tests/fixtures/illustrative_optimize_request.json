@@ -1,0 +1,27 @@
+{
+  "mode": "generate",
+  "body": {
+    "position": {"value": "PG", "locked": true},
+    "height_in": {"value": 76, "locked": false},
+    "weight_lb": {"value": null, "locked": false},
+    "wingspan_in": {"value": null, "locked": false}
+  },
+  "attribute_targets": [
+    {"id": "three_point", "target": 89, "importance": "required"},
+    {"id": "ball_handle", "target": 86, "importance": "prioritized"},
+    {"id": "perimeter_defense", "target": 90, "importance": "normal"}
+  ],
+  "cap_breakers": {
+    "pools": [
+      {"id": "general", "kind": "unrestricted", "available": 5},
+      {"id": "spec_shooting", "kind": "specialization", "category": "shooting", "available": 2}
+    ],
+    "reserved_total": 0,
+    "forbidden_attribute_ids": [],
+    "minimum_allocations": []
+  },
+  "badges": [{"id": "set_and_fire", "minimum_tier": "gold", "importance": "normal"}],
+  "animations": [],
+  "takeovers": [],
+  "playstyle": "automatic"
+}
