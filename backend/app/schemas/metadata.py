@@ -1,6 +1,6 @@
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.domain import BuildType, Importance, Position
+from app.domain import BadgeTier, BuildType, Importance, Position
 from app.rules.manifest import PositionCoverage
 
 
@@ -21,6 +21,15 @@ class AttributeDescriptor(BaseModel):
     category: str
 
 
+class UnlockDescriptor(BaseModel):
+    """Verified unlock id. The label repeats the id because no display name is stored."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    id: str
+    label: str
+
+
 class MetadataResponse(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -36,5 +45,9 @@ class MetadataResponse(BaseModel):
     importance_levels: list[Importance]
     playstyles: list[PlaystyleOption]
     attributes: list[AttributeDescriptor]
+    badges: list[UnlockDescriptor]
+    animations: list[UnlockDescriptor]
+    takeovers: list[UnlockDescriptor]
+    badge_tiers: list[BadgeTier]
     coverage: list[PositionCoverage]
     notes: list[str] = Field(default_factory=list)

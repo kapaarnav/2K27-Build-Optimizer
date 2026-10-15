@@ -81,7 +81,14 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Optimize Build */
+        /**
+         * Optimize Build
+         * @description Search verified bodies outside the event loop.
+         *
+         *     FastAPI runs this synchronous handler on a threadpool. One request shares
+         *     one deadline across bodies. The shipped ruleset has no verified coverage,
+         *     so the response stays unsupported.
+         */
         post: operations["optimize_build_api_v1_optimize_post"];
         delete?: never;
         options?: never;
@@ -524,6 +531,14 @@ export interface components {
             playstyles: components["schemas"]["PlaystyleOption"][];
             /** Attributes */
             attributes: components["schemas"]["AttributeDescriptor"][];
+            /** Badges */
+            badges: components["schemas"]["UnlockDescriptor"][];
+            /** Animations */
+            animations: components["schemas"]["UnlockDescriptor"][];
+            /** Takeovers */
+            takeovers: components["schemas"]["UnlockDescriptor"][];
+            /** Badge Tiers */
+            badge_tiers: components["schemas"]["BadgeTier"][];
             /** Coverage */
             coverage: components["schemas"]["PositionCoverage"][];
             /** Notes */
@@ -668,6 +683,16 @@ export interface components {
         /** ShareCreateRequest */
         ShareCreateRequest: {
             candidate: components["schemas"]["Recommendation"];
+        };
+        /**
+         * UnlockDescriptor
+         * @description Verified badge, animation, or Takeover id. Label repeats the id; no display name is stored.
+         */
+        UnlockDescriptor: {
+            /** Id */
+            id: string;
+            /** Label */
+            label: string;
         };
         /** UnlockRequest */
         UnlockRequest: {

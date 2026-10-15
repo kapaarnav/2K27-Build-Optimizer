@@ -1,25 +1,21 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 
+import { BuildPage } from "./app/BuildPage.tsx";
+import { ComparePage } from "./app/ComparePage.tsx";
 import { HomePage } from "./app/HomePage.tsx";
 import { Layout } from "./app/Layout.tsx";
 import { MethodologyPage } from "./app/MethodologyPage.tsx";
 import { PlaceholderPage } from "./app/PlaceholderPage.tsx";
+import { ResultsPage } from "./app/ResultsPage.tsx";
+import { PlannerProvider } from "./state/PlannerProvider.tsx";
 
-export function App() {
+export function AppRoutes() {
   return (
-    <BrowserRouter>
+    <PlannerProvider>
       <Routes>
         <Route element={<Layout />}>
           <Route index element={<HomePage />} />
-          <Route
-            path="build"
-            element={
-              <PlaceholderPage
-                title="Builder"
-                body="The builder form arrives after a verified ruleset can describe legal inputs. Nothing entered here would be recommended yet."
-              />
-            }
-          />
+          <Route path="build" element={<BuildPage />} />
           <Route
             path="build/:shareId"
             element={
@@ -29,27 +25,19 @@ export function App() {
               />
             }
           />
-          <Route
-            path="results"
-            element={
-              <PlaceholderPage
-                title="Results"
-                body="Results stay on this device after a search. There is no verified search to run yet."
-              />
-            }
-          />
-          <Route
-            path="compare"
-            element={
-              <PlaceholderPage
-                title="Compare"
-                body="Comparison of up to three generated builds arrives with the results view."
-              />
-            }
-          />
+          <Route path="results" element={<ResultsPage />} />
+          <Route path="compare" element={<ComparePage />} />
           <Route path="about/methodology" element={<MethodologyPage />} />
         </Route>
       </Routes>
+    </PlannerProvider>
+  );
+}
+
+export function App() {
+  return (
+    <BrowserRouter>
+      <AppRoutes />
     </BrowserRouter>
   );
 }

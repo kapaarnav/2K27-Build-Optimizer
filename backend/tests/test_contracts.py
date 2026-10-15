@@ -160,6 +160,10 @@ def test_metadata_has_no_attribute_dictionary(client: TestClient) -> None:
     body = response.json()
     assert body["recommendations_enabled"] is False
     assert body["attributes"] == []
+    assert body["badges"] == []
+    assert body["animations"] == []
+    assert body["takeovers"] == []
+    assert body["badge_tiers"] == ["bronze", "silver", "gold", "hall_of_fame"]
     assert body["coverage"] == []
     assert body["positions"] == ["PG", "SG", "SF", "PF", "C"]
     assert body["build_types"] == ["male", "female"]

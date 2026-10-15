@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 
 import { CoverageStatus } from "../components/CoverageStatus.tsx";
@@ -17,6 +18,12 @@ export function HomePage() {
           Describe the MyPLAYER you want. Recommendations appear only after the
           matching builder rules have been verified in game.
         </p>
+        <Link
+          to="/build"
+          className="mt-4 inline-block rounded-md border border-stone-900 bg-stone-900 px-3 py-2 text-sm font-medium text-white"
+        >
+          Open the builder
+        </Link>
       </div>
       <p className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
         Unofficial NBA 2K27 build planning tool. Not affiliated with or endorsed by 2K

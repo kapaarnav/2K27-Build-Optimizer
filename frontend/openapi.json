@@ -126,6 +126,7 @@
           "optimize"
         ],
         "summary": "Optimize Build",
+        "description": "Search verified bodies outside the event loop.\n\nFastAPI runs this synchronous handler on a threadpool. One request shares\none deadline across bodies. The shipped ruleset has no verified coverage,\nso the response stays unsupported.",
         "operationId": "optimize_build_api_v1_optimize_post",
         "requestBody": {
           "content": {
@@ -1306,6 +1307,34 @@
             "type": "array",
             "title": "Attributes"
           },
+          "badges": {
+            "items": {
+              "$ref": "#/components/schemas/UnlockDescriptor"
+            },
+            "type": "array",
+            "title": "Badges"
+          },
+          "animations": {
+            "items": {
+              "$ref": "#/components/schemas/UnlockDescriptor"
+            },
+            "type": "array",
+            "title": "Animations"
+          },
+          "takeovers": {
+            "items": {
+              "$ref": "#/components/schemas/UnlockDescriptor"
+            },
+            "type": "array",
+            "title": "Takeovers"
+          },
+          "badge_tiers": {
+            "items": {
+              "$ref": "#/components/schemas/BadgeTier"
+            },
+            "type": "array",
+            "title": "Badge Tiers"
+          },
           "coverage": {
             "items": {
               "$ref": "#/components/schemas/PositionCoverage"
@@ -1336,6 +1365,10 @@
           "importance_levels",
           "playstyles",
           "attributes",
+          "badges",
+          "animations",
+          "takeovers",
+          "badge_tiers",
           "coverage"
         ],
         "title": "MetadataResponse"
@@ -1769,6 +1802,26 @@
           "candidate"
         ],
         "title": "ShareCreateRequest"
+      },
+      "UnlockDescriptor": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "label"
+        ],
+        "title": "UnlockDescriptor",
+        "description": "Verified badge, animation, or Takeover id. Label repeats the id; no display name is stored."
       },
       "UnlockRequest": {
         "properties": {

@@ -1,6 +1,6 @@
 # Unofficial NBA 2K27 Build Optimizer
 
-Planning tool for NBA 2K27 MyPLAYER builds. This repository is at milestone M3: multi-body search and ranking on top of the single-body solver. The shipped ruleset is still `nba2k27-unverified`, with an empty attribute catalog and no legal body ranges.
+Planning tool for NBA 2K27 MyPLAYER builds. This repository is at milestone M4: the builder and results pages on top of the guarded search. The shipped ruleset is still `nba2k27-unverified`, with an empty attribute catalog and no legal body ranges.
 
 No NBA 2K27 attribute costs, body limits, badge rules, animations, Takeovers, or archetype names are included. Optimize and validate accept a well-formed request and return `unsupported`, naming each missing mechanic. They do not invent a build. Build type is `male` or `female`, and neither has a verified height, weight, or wingspan range.
 
@@ -67,12 +67,12 @@ cd frontend && npm run generate:api
 ## What this version does not do
 
 - It does not recommend builds from the shipped ruleset. A locked body, a target rating, or a badge tier is not treated as legal just because the JSON shape is valid.
-- It does not store shared builds or issue reports. Those routes return `501`.
-- It does not build the results pages. Search rankings are returned by the API; the end-user builder is a later milestone.
+- It does not store shared builds or issue reports. Those routes return `501`, and the results page says sharing is off.
+- The builder, results, compare, and refine views run in the browser. Refreshing the page clears the latest search. Attribute, badge, animation, and Takeover choices come from `GET /api/v1/metadata`, which is empty until rules are verified.
 - Numeric limits on the request (for example a rating of 150 or a weight of 1000) are API transport limits, not in-game ranges.
 - Synthetic fixtures under `backend/tests/fixtures/synthetic/` are toy data. The active loader rejects them. A passing solver test on that fixture is not an NBA 2K27 result.
 
-The next milestone is the end-user builder and results pages. Game values get added only after they are observed in the builder and checked in together.
+The next milestone is sharing, issue reports, and the persistent search cache. Game values get added only after they are observed in the builder and checked in together.
 
 To record search latency on the toy fixture:
 
