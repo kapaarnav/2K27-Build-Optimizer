@@ -1,0 +1,213 @@
+cases:
+  - id: exact_pg_body_is_legal
+    mechanic: body
+    body: {build_type: male, position: PG, height_in: 70, weight_lb: 170, wingspan_in: 70}
+    expect: {status: verified, code: body_legal, legal: true}
+
+  - id: other_pg_height_contradicts_complete_list
+    mechanic: body
+    body: {build_type: male, position: PG, height_in: 71, weight_lb: 170, wingspan_in: 70}
+    expect:
+      status: verified
+      code: body_not_legal
+      legal: false
+      absent_words: [unsupported, infeasible]
+
+  - id: sg_outside_partial_list_is_unsupported
+    mechanic: body
+    body: {build_type: male, position: SG, height_in: 72, weight_lb: 171, wingspan_in: 71}
+    expect:
+      status: unsupported
+      code: body_not_in_partial_coverage
+      absent_words: [infeasible, impossible]
+
+  - id: exact_sg_body_is_legal
+    mechanic: body
+    body: {build_type: male, position: SG, height_in: 71, weight_lb: 171, wingspan_in: 71}
+    expect: {status: verified, code: body_legal, legal: true}
+
+  - id: female_body_has_no_coverage
+    mechanic: body
+    body: {build_type: female, position: PG, height_in: 70, weight_lb: 170, wingspan_in: 70}
+    expect:
+      status: unsupported
+      code: body_coverage_missing
+      absent_words: [infeasible, impossible]
+
+  - id: ratings_inside_bounds
+    mechanic: bounds
+    body: {build_type: male, position: PG, height_in: 70, weight_lb: 170, wingspan_in: 70}
+    ratings:
+      - {id: toy_shot, rating: 80}
+      - {id: toy_finish, rating: 40}
+    expect: {status: verified, code: attributes_within_bounds, legal: true}
+
+  - id: rating_outside_bounds
+    mechanic: bounds
+    body: {build_type: male, position: PG, height_in: 70, weight_lb: 170, wingspan_in: 70}
+    ratings:
+      - {id: toy_shot, rating: 89}
+      - {id: toy_finish, rating: 40}
+    expect: {status: verified, code: attribute_out_of_bounds, legal: false}
+
+  - id: link_forces_finish
+    mechanic: links
+    ratings:
+      - {id: toy_shot, rating: 80}
+      - {id: toy_finish, rating: 10}
+    expect:
+      status: verified
+      code: links_applied
+      forced: {toy_finish: 40}
+
+  - id: required_finish_cannot_be_raised
+    mechanic: required_conflict
+    ratings:
+      - {id: toy_shot, rating: 80}
+      - {id: toy_finish, rating: 10}
+    required:
+      - {id: toy_finish, rating: 10}
+    expect:
+      status: contradictory
+      code: required_target_conflict
+      forced: {toy_finish: 40}
+
+  - id: required_finish_holds_when_it_matches
+    mechanic: required_conflict
+    ratings:
+      - {id: toy_shot, rating: 80}
+      - {id: toy_finish, rating: 10}
+    required:
+      - {id: toy_finish, rating: 40}
+    expect:
+      status: verified
+      code: required_targets_hold
+      forced: {toy_finish: 40}
+
+  - id: exact_overall_matches
+    mechanic: cost
+    body: {build_type: male, position: PG, height_in: 70, weight_lb: 170, wingspan_in: 70}
+    ratings:
+      - {id: toy_shot, rating: 80}
+      - {id: toy_finish, rating: 40}
+    expect: {status: verified, code: exact_vector_matched, overall: 70}
+
+  - id: nearby_overall_is_not_estimated
+    mechanic: cost
+    body: {build_type: male, position: PG, height_in: 70, weight_lb: 170, wingspan_in: 70}
+    ratings:
+      - {id: toy_shot, rating: 80}
+      - {id: toy_finish, rating: 41}
+    expect:
+      status: unsupported
+      code: cost_not_observed
+      absent_words: [infeasible, impossible]
+
+  - id: exact_name_matches
+    mechanic: name
+    body: {build_type: male, position: PG, height_in: 70, weight_lb: 170, wingspan_in: 70}
+    ratings:
+      - {id: toy_shot, rating: 80}
+      - {id: toy_finish, rating: 40}
+    expect: {status: verified, code: archetype_name_matched, name: TOY_ARCHETYPE}
+
+  - id: nearby_vector_gets_no_generated_name
+    mechanic: name
+    body: {build_type: male, position: PG, height_in: 70, weight_lb: 170, wingspan_in: 70}
+    ratings:
+      - {id: toy_shot, rating: 80}
+      - {id: toy_finish, rating: 41}
+    expect: {status: unsupported, code: archetype_name_not_observed}
+
+  - id: gold_badge_is_eligible
+    mechanic: badge
+    badge_id: toy_badge
+    body: {build_type: male, position: PG, height_in: 70, weight_lb: 170, wingspan_in: 70}
+    ratings:
+      - {id: toy_shot, rating: 80}
+      - {id: toy_finish, rating: 40}
+    expect: {status: verified, code: badge_eligible, eligible: true, highest_tier: gold}
+
+  - id: short_badge_is_ineligible
+    mechanic: badge
+    badge_id: toy_badge
+    body: {build_type: male, position: PG, height_in: 70, weight_lb: 170, wingspan_in: 70}
+    ratings:
+      - {id: toy_shot, rating: 79}
+      - {id: toy_finish, rating: 40}
+    expect: {status: ineligible, code: badge_requirements_unmet, eligible: false}
+
+  - id: unknown_badge_is_unsupported
+    mechanic: badge
+    badge_id: missing_badge
+    body: {build_type: male, position: PG, height_in: 70, weight_lb: 170, wingspan_in: 70}
+    ratings:
+      - {id: toy_shot, rating: 80}
+      - {id: toy_finish, rating: 40}
+    expect: {status: unsupported, code: badge_unverified}
+
+  - id: animation_is_eligible
+    mechanic: animation
+    animation_id: toy_anim
+    body: {build_type: male, position: PG, height_in: 70, weight_lb: 170, wingspan_in: 70}
+    ratings:
+      - {id: toy_shot, rating: 80}
+      - {id: toy_finish, rating: 40}
+    expect: {status: verified, code: unlock_eligible, eligible: true}
+
+  - id: unknown_animation_is_unsupported
+    mechanic: animation
+    animation_id: missing_anim
+    body: {build_type: male, position: PG, height_in: 70, weight_lb: 170, wingspan_in: 70}
+    ratings:
+      - {id: toy_shot, rating: 80}
+      - {id: toy_finish, rating: 40}
+    expect: {status: unsupported, code: animation_unverified}
+
+  - id: takeover_is_eligible
+    mechanic: takeover
+    takeover_id: toy_takeover
+    body: {build_type: male, position: PG, height_in: 70, weight_lb: 170, wingspan_in: 70}
+    ratings:
+      - {id: toy_shot, rating: 80}
+      - {id: toy_finish, rating: 40}
+    expect: {status: verified, code: unlock_eligible, eligible: true}
+
+  - id: short_takeover_is_ineligible
+    mechanic: takeover
+    takeover_id: toy_takeover
+    body: {build_type: male, position: PG, height_in: 70, weight_lb: 170, wingspan_in: 70}
+    ratings:
+      - {id: toy_shot, rating: 80}
+      - {id: toy_finish, rating: 39}
+    expect: {status: ineligible, code: unlock_requirements_unmet, eligible: false}
+
+  - id: one_breaker_grants_two
+    mechanic: cap_breaker
+    attribute_id: toy_shot
+    starting_rating: 80
+    applications: 1
+    expect: {status: verified, code: cap_breaker_gain_matched, rating_gain: 2}
+
+  - id: two_breakers_are_not_assumed
+    mechanic: cap_breaker
+    attribute_id: toy_shot
+    starting_rating: 80
+    applications: 2
+    expect: {status: unsupported, code: cap_breaker_step_not_observed}
+
+  - id: application_limit_is_unverified
+    mechanic: cap_limit
+    expect: {status: unsupported, code: cap_breaker_limit_unverified}
+
+  - id: specialization_matches
+    mechanic: specialization
+    category: toy_shooting
+    attribute_id: toy_shot
+    expect: {status: verified, code: specialization_allowed, allowed: true}
+
+  - id: unlisted_specialization_is_unsupported
+    mechanic: specialization
+    category: toy_shooting
+    attribute_id: toy_finish
+    expect: {status: unsupported, code: specialization_not_observed}

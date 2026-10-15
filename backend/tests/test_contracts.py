@@ -106,6 +106,52 @@ def test_validate_does_not_judge_legality_without_rules(
     body = response.json()
     assert body["supported"] is False
     assert body["issues"][0]["code"] == "coverage_unsupported"
+    codes = {issue["code"] for issue in body["issues"]}
+    assert {
+        "attribute_catalog_unverified",
+        "body_profiles_unverified",
+        "linked_attributes_unverified",
+        "attribute_costs_unverified",
+        "archetype_names_unverified",
+        "cap_breakers_unverified",
+        "badge_unverified",
+    } <= codes
+    badge = next(issue for issue in body["issues"] if issue["code"] == "badge_unverified")
+    assert "set_and_fire" in badge["message"]
+    assert "unsupported" in badge["message"].lower()
+    assert "infeasible" not in response.text.lower()
+
+
+def test_locked_female_body_is_not_called_illegal(client: TestClient) -> None:
+    response = client.post(
+        "/api/v1/validate",
+        json={
+            "attribute_targets": [
+                {"id": "three_point", "target": 89, "importance": "required"},
+            ],
+            "body": {"build_type": {"value": "female", "locked": True}},
+        },
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["supported"] is False
+    messages = " ".join(issue["message"] for issue in body["issues"])
+    assert "not judged legal or illegal" in messages
+    assert "infeasible" not in response.text.lower()
+
+
+def test_locked_build_type_needs_a_value(client: TestClient) -> None:
+    response = client.post(
+        "/api/v1/optimize",
+        json={
+            "attribute_targets": [
+                {"id": "three_point", "target": 89, "importance": "required"},
+            ],
+            "body": {"build_type": {"value": None, "locked": True}},
+        },
+    )
+    assert response.status_code == 422
+    assert "locked field" in response.text.lower()
 
 
 def test_metadata_has_no_attribute_dictionary(client: TestClient) -> None:
@@ -116,6 +162,7 @@ def test_metadata_has_no_attribute_dictionary(client: TestClient) -> None:
     assert body["attributes"] == []
     assert body["coverage"] == []
     assert body["positions"] == ["PG", "SG", "SF", "PF", "C"]
+    assert body["build_types"] == ["male", "female"]
     assert "Unofficial" in body["disclaimer"]
     assert len(body["files_sha256"]) == 64
 
@@ -210,7 +257,13 @@ def test_share_and_reports_are_not_implemented(client: TestClient) -> None:
         "name": "SYNTHETIC_NOT_A_RECOMMENDATION",
         "rank": 1,
         "score": 1,
-        "body": {"position": "PG", "height_in": 76, "weight_lb": 180, "wingspan_in": 78},
+        "body": {
+            "build_type": "male",
+            "position": "PG",
+            "height_in": 76,
+            "weight_lb": 180,
+            "wingspan_in": 78,
+        },
         "base_attributes": [{"id": "three_point", "rating": 80}],
         "final_attributes": [{"id": "three_point", "rating": 80}],
         "cap_breaker_allocations": [],

@@ -1,0 +1,4 @@
+# The product spec expects 21 sourced attribute ids.
+# None are listed until a verified source supplies the names.
+catalog_complete: false
+attributes: []

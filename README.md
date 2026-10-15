@@ -1,8 +1,12 @@
 # Unofficial NBA 2K27 Build Optimizer
 
-Planning tool for NBA 2K27 MyPLAYER builds. This repository is at milestone M0: the API contract, an empty verified-rules manifest, and a web page that shows whether recommendations are available.
+Planning tool for NBA 2K27 MyPLAYER builds. This repository is at milestone M2: a single-body solver on top of the rules harness. The shipped ruleset is still `nba2k27-unverified`, with an empty attribute catalog and no legal body ranges.
 
-No NBA 2K27 attribute costs, body limits, badge rules, animations, Takeovers, or archetype names are included. The shipped ruleset is `nba2k27-unverified`. Optimize and validate accept a well-formed request and return `unsupported`. They do not invent a build.
+No NBA 2K27 attribute costs, body limits, badge rules, animations, Takeovers, or archetype names are included. Optimize and validate accept a well-formed request and return `unsupported`, naming each missing mechanic. They do not invent a build. Build type is `male` or `female`, and neither has a verified height, weight, or wingspan range.
+
+When a request is fully covered by verified rules, the solver searches that one locked body and checks the recipe again with the rules engine. Today that coverage is empty, so the public search does not run. Toy numbers live in tests only.
+
+See `docs/RULES_PROVENANCE.md` and `docs/VERIFICATION_PROTOCOL.md`.
 
 This is not an official 2K or NBA product.
 
@@ -62,9 +66,10 @@ cd frontend && npm run generate:api
 
 ## What this version does not do
 
-- It does not recommend builds, allocate Cap Breakers, or name archetypes.
+- It does not recommend builds from the shipped ruleset. A locked body, a target rating, or a badge tier is not treated as legal just because the JSON shape is valid.
+- It does not search unlocked measurements across bodies, rank a top 5, or build distinct alternatives. Those are later milestones.
 - It does not store shared builds or issue reports. Those routes return `501`.
-- It does not treat a locked body, a target rating, or a badge tier as legal just because the JSON shape is valid. Game legality waits for verified rules.
 - Numeric limits on the request (for example a rating of 150 or a weight of 1000) are API transport limits, not in-game ranges.
+- Synthetic fixtures under `backend/tests/fixtures/synthetic/` are toy data. The active loader rejects them. A passing solver test on that fixture is not an NBA 2K27 result.
 
-The next milestone is a rules loader and verification harness. Game values get added only after they are observed in the builder and checked in together.
+The next milestone is multi-body search and ranking. Game values get added only after they are observed in the builder and checked in together.

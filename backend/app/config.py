@@ -1,5 +1,6 @@
 from functools import lru_cache
 
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -8,6 +9,8 @@ class Settings(BaseSettings):
 
     database_url: str = "postgresql+psycopg://optimizer:optimizer@localhost:5432/optimizer"
     cors_origins: str = "http://localhost:5173"
+    # Search budget for one locked body. Not a game-rule number.
+    solver_max_seconds: float = Field(default=2.0, gt=0, le=30)
 
     @property
     def cors_origin_list(self) -> list[str]:

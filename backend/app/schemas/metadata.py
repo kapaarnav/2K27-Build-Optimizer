@@ -1,6 +1,6 @@
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.domain import Importance, Position
+from app.domain import BuildType, Importance, Position
 from app.rules.manifest import PositionCoverage
 
 
@@ -32,6 +32,7 @@ class MetadataResponse(BaseModel):
     disclaimer: str
     recommendations_enabled: bool
     positions: list[Position]
+    build_types: list[BuildType]
     importance_levels: list[Importance]
     playstyles: list[PlaystyleOption]
     attributes: list[AttributeDescriptor]

@@ -34,6 +34,7 @@ export function HomePage() {
             recommendationsEnabled: metadata.data.recommendations_enabled,
             notes: metadata.data.notes ?? [],
             disclaimer: metadata.data.disclaimer,
+            buildTypes: metadata.data.build_types,
           }}
         />
       ) : null}

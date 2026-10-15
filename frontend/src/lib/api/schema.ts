@@ -186,6 +186,7 @@ export interface components {
         BadgeTier: "bronze" | "silver" | "gold" | "hall_of_fame";
         /** BodyInput */
         BodyInput: {
+            build_type?: components["schemas"]["LockedBuildType"];
             position?: components["schemas"]["LockedPosition"];
             height_in?: components["schemas"]["LockedInches"];
             weight_lb?: components["schemas"]["LockedPounds"];
@@ -193,6 +194,7 @@ export interface components {
         };
         /** BuildMeasurements */
         BuildMeasurements: {
+            build_type: components["schemas"]["BuildType"];
             position: components["schemas"]["Position"];
             /** Height In */
             height_in: number;
@@ -201,6 +203,12 @@ export interface components {
             /** Wingspan In */
             wingspan_in: number;
         };
+        /**
+         * BuildType
+         * @description Player model. Legal measurement ranges are verified rules, not this enum.
+         * @enum {string}
+         */
+        BuildType: "male" | "female";
         /** CacheInfo */
         CacheInfo: {
             /** Hit */
@@ -446,6 +454,15 @@ export interface components {
             /** Share Id */
             share_id?: string | null;
         };
+        /** LockedBuildType */
+        LockedBuildType: {
+            value?: components["schemas"]["BuildType"] | null;
+            /**
+             * Locked
+             * @default false
+             */
+            locked: boolean;
+        };
         /**
          * LockedInches
          * @description Inches field. The numeric bound is an API limit, not a legal body range.
@@ -499,6 +516,8 @@ export interface components {
             recommendations_enabled: boolean;
             /** Positions */
             positions: components["schemas"]["Position"][];
+            /** Build Types */
+            build_types: components["schemas"]["BuildType"][];
             /** Importance Levels */
             importance_levels: components["schemas"]["Importance"][];
             /** Playstyles */

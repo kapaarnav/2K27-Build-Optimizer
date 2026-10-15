@@ -43,6 +43,7 @@ class RulesManifest(BaseModel):
     source_app_version: str = "unknown"
     tuning_version: str = "unknown"
     verified_by: list[str] = Field(default_factory=list)
+    synthetic: bool = False
     coverage: list[PositionCoverage] = Field(default_factory=list)
     notes: list[str] = Field(default_factory=list)
 

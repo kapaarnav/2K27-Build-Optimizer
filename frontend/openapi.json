@@ -429,6 +429,9 @@
       },
       "BodyInput": {
         "properties": {
+          "build_type": {
+            "$ref": "#/components/schemas/LockedBuildType"
+          },
           "position": {
             "$ref": "#/components/schemas/LockedPosition"
           },
@@ -448,6 +451,9 @@
       },
       "BuildMeasurements": {
         "properties": {
+          "build_type": {
+            "$ref": "#/components/schemas/BuildType"
+          },
           "position": {
             "$ref": "#/components/schemas/Position"
           },
@@ -473,12 +479,22 @@
         "additionalProperties": false,
         "type": "object",
         "required": [
+          "build_type",
           "position",
           "height_in",
           "weight_lb",
           "wingspan_in"
         ],
         "title": "BuildMeasurements"
+      },
+      "BuildType": {
+        "type": "string",
+        "enum": [
+          "male",
+          "female"
+        ],
+        "title": "BuildType",
+        "description": "Player model. Legal measurement ranges are verified rules, not this enum."
       },
       "CacheInfo": {
         "properties": {
@@ -1129,6 +1145,28 @@
         ],
         "title": "IssueReportRequest"
       },
+      "LockedBuildType": {
+        "properties": {
+          "value": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BuildType"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "locked": {
+            "type": "boolean",
+            "title": "Locked",
+            "default": false
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "LockedBuildType"
+      },
       "LockedInches": {
         "properties": {
           "value": {
@@ -1240,6 +1278,13 @@
             "type": "array",
             "title": "Positions"
           },
+          "build_types": {
+            "items": {
+              "$ref": "#/components/schemas/BuildType"
+            },
+            "type": "array",
+            "title": "Build Types"
+          },
           "importance_levels": {
             "items": {
               "$ref": "#/components/schemas/Importance"
@@ -1287,6 +1332,7 @@
           "disclaimer",
           "recommendations_enabled",
           "positions",
+          "build_types",
           "importance_levels",
           "playstyles",
           "attributes",

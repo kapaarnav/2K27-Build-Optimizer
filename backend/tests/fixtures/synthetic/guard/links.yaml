@@ -1,0 +1,18 @@
+complete: true
+status: verified
+synthetic: true
+provenance: &prov
+  source: Synthetic fixture. Not an NBA 2K27 observation.
+  observed_at: 2026-01-01
+  source_app_version: synthetic
+  evidence_ref: tests/fixtures/synthetic/guard
+  notes: Toy numbers for the rules harness only.
+links:
+  - id: toy_shot_raises_finish
+    source_attribute_id: toy_shot
+    target_attribute_id: toy_finish
+    when_source_at_least: 80
+    target_minimum: 40
+    status: verified
+    synthetic: true
+    provenance: *prov

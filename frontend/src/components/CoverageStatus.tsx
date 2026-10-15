@@ -3,6 +3,7 @@ export type CoverageView = {
   recommendationsEnabled: boolean;
   notes: string[];
   disclaimer: string;
+  buildTypes: string[];
 };
 
 type CoverageStatusProps =
@@ -66,6 +67,11 @@ export function CoverageStatus(props: CoverageStatusProps) {
           <li key={note}>{note}</li>
         ))}
       </ul>
+      <p className="mt-4 text-stone-800">
+        {props.coverage.recommendationsEnabled
+          ? `Build types: ${props.coverage.buildTypes.join(", ")}.`
+          : `Build types: ${props.coverage.buildTypes.join(", ")}. No height, weight, or wingspan range is verified for either.`}
+      </p>
       <p className="mt-4 text-sm text-stone-600">{props.coverage.disclaimer}</p>
     </section>
   );

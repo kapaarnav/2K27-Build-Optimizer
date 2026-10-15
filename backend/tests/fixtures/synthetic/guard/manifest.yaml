@@ -1,0 +1,27 @@
+ruleset_id: synthetic-guard
+game: nba2k27
+observed_at: 2026-01-01
+source_app_version: synthetic
+tuning_version: synthetic
+verified_by:
+  - synthetic-fixture
+synthetic: true
+coverage:
+  - position: PG
+    body_profiles: verified
+    attribute_costs: verified
+    cap_breakers: verified
+    badge_eligibility: verified
+    animations: verified
+    takeovers: verified
+    archetype_names: verified
+  - position: SG
+    body_profiles: verified
+    attribute_costs: unsupported
+    cap_breakers: unsupported
+    badge_eligibility: unsupported
+    animations: unsupported
+    takeovers: unsupported
+    archetype_names: unsupported
+notes:
+  - Synthetic fixture. Not an NBA 2K27 ruleset. Public recommendations stay off.

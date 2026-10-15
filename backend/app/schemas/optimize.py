@@ -7,6 +7,7 @@ from app.domain import (
     IDENTIFIER_PATTERN,
     PLAYSTYLE_IDS,
     BadgeTier,
+    BuildType,
     Importance,
     PoolKind,
     Position,
@@ -118,6 +119,7 @@ class AttributeRating(BaseModel):
 class BuildMeasurements(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
+    build_type: BuildType
     position: Position
     height_in: int = Field(ge=1, le=150)
     weight_lb: int = Field(ge=1, le=1000)

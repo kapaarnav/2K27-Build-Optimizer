@@ -9,6 +9,13 @@ class Position(StrEnum):
     center = "C"
 
 
+class BuildType(StrEnum):
+    """Player model. Legal measurement ranges are verified rules, not this enum."""
+
+    male = "male"
+    female = "female"
+
+
 class Importance(StrEnum):
     required = "required"
     prioritized = "prioritized"
@@ -74,8 +81,8 @@ PLAYSTYLE_IDS: frozenset[str] = frozenset(playstyle_id for playstyle_id, _label 
 
 IDENTIFIER_PATTERN = r"^[a-z][a-z0-9_]{0,63}$"
 
-SCORING_VERSION = "score-unconfigured"
-OPTIMIZER_VERSION = "optimizer-none"
+SCORING_VERSION = "score-m2"
+OPTIMIZER_VERSION = "optimizer-m2-single-body"
 
 DISCLAIMER = (
     "Unofficial NBA 2K27 build planning tool. "

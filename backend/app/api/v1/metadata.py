@@ -5,11 +5,13 @@ from app.domain import (
     OPTIMIZER_VERSION,
     PLAYSTYLES,
     SCORING_VERSION,
+    BuildType,
     Importance,
     Position,
+    VerificationStatus,
 )
 from app.rules.loader import ActiveRuleset
-from app.schemas.metadata import MetadataResponse, PlaystyleOption
+from app.schemas.metadata import AttributeDescriptor, MetadataResponse, PlaystyleOption
 
 router = APIRouter(tags=["metadata"])
 
@@ -26,9 +28,14 @@ def metadata(request: Request) -> MetadataResponse:
         disclaimer=DISCLAIMER,
         recommendations_enabled=ruleset.recommendations_enabled,
         positions=list(Position),
+        build_types=list(BuildType),
         importance_levels=list(Importance),
         playstyles=[PlaystyleOption(id=item_id, label=label) for item_id, label in PLAYSTYLES],
-        attributes=[],
+        attributes=[
+            AttributeDescriptor(id=item.id, label=item.label, category=item.category)
+            for item in ruleset.bundle.attributes.attributes
+            if item.status is VerificationStatus.verified and not item.synthetic
+        ],
         coverage=list(ruleset.manifest.coverage),
         notes=list(ruleset.manifest.notes),
     )

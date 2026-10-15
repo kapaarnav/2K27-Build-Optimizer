@@ -1,1 +1,1 @@
-"""Planning services. The optimizer arrives after verified rules exist."""
+"""Request assessment and the single-body search entry point."""

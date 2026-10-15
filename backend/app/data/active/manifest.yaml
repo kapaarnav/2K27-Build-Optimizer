@@ -4,6 +4,7 @@ observed_at: null
 source_app_version: unknown
 tuning_version: unknown
 verified_by: []
+synthetic: false
 coverage: []
 notes:
   - No verified NBA 2K27 rules are loaded. Public build recommendations are disabled.

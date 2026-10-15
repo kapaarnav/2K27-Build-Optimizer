@@ -1,0 +1,22 @@
+max_applications: null
+gain_steps:
+  - rule_id: toy_shot_one_step
+    attribute_id: toy_shot
+    starting_rating: 80
+    applications: 1
+    rating_gain: 2
+    status: verified
+    synthetic: true
+    provenance: &prov
+      source: Synthetic fixture. Not an NBA 2K27 observation.
+      observed_at: 2026-01-01
+      source_app_version: synthetic
+      evidence_ref: tests/fixtures/synthetic/guard
+      notes: Toy numbers for the rules harness only.
+specialization_permissions:
+  - rule_id: toy_shooting_shot
+    category: toy_shooting
+    attribute_id: toy_shot
+    status: verified
+    synthetic: true
+    provenance: *prov

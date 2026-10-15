@@ -9,6 +9,7 @@ const coverage = {
   recommendationsEnabled: false,
   notes: ["No verified NBA 2K27 rules are loaded. Public build recommendations are disabled."],
   disclaimer: "Unofficial NBA 2K27 build planning tool.",
+  buildTypes: ["male", "female"],
 };
 
 describe("CoverageStatus", () => {
@@ -21,6 +22,8 @@ describe("CoverageStatus", () => {
     render(<CoverageStatus state="success" coverage={coverage} />);
     expect(screen.getByText("Recommendations off")).toBeInTheDocument();
     expect(screen.getByText(/No verified NBA 2K27 rules are loaded/)).toBeInTheDocument();
+    expect(screen.getByText(/Build types: male, female/)).toBeInTheDocument();
+    expect(screen.getByText(/No height, weight, or wingspan range is verified/)).toBeInTheDocument();
   });
 
   it("shows a reachable error and retries", async () => {

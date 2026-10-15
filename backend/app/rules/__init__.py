@@ -1,1 +1,1 @@
-"""Verified game-rule loading. Empty coverage means recommendations stay off."""
+"""Rules loading and evaluation. Unverified mechanics are rejected, not guessed."""

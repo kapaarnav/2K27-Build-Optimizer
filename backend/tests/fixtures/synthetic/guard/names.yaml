@@ -1,0 +1,21 @@
+names:
+  - id: toy_pg_name
+    build_type: male
+    position: PG
+    height_in: 70
+    weight_lb: 170
+    wingspan_in: 70
+    base_attributes:
+      - id: toy_shot
+        rating: 80
+      - id: toy_finish
+        rating: 40
+    name: TOY_ARCHETYPE
+    status: verified
+    synthetic: true
+    provenance:
+      source: Synthetic fixture. Not an NBA 2K27 observation.
+      observed_at: 2026-01-01
+      source_app_version: synthetic
+      evidence_ref: tests/fixtures/synthetic/guard
+      notes: Toy numbers for the rules harness only.

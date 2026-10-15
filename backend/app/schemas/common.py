@@ -2,7 +2,7 @@ from typing import Annotated
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from app.domain import Position
+from app.domain import BuildType, Position
 
 # Transport ceilings only. In-game minimums and maximums come from verified rules.
 Rating = Annotated[int, Field(ge=0, le=150)]
@@ -53,9 +53,23 @@ class LockedPounds(BaseModel):
         return self
 
 
+class LockedBuildType(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    value: BuildType | None = None
+    locked: bool = False
+
+    @model_validator(mode="after")
+    def lock_needs_value(self) -> "LockedBuildType":
+        if self.locked and self.value is None:
+            raise ValueError("A locked field needs a value.")
+        return self
+
+
 class BodyInput(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
+    build_type: LockedBuildType = Field(default_factory=LockedBuildType)
     position: LockedPosition = Field(default_factory=LockedPosition)
     height_in: LockedInches = Field(default_factory=LockedInches)
     weight_lb: LockedPounds = Field(default_factory=LockedPounds)

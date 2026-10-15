@@ -1,0 +1,45 @@
+body_coverage:
+  - build_type: male
+    position: PG
+    enumeration: complete
+    status: verified
+    synthetic: true
+    provenance: &prov
+      source: Synthetic fixture. Not an NBA 2K27 observation.
+      observed_at: 2026-01-01
+      source_app_version: synthetic
+      evidence_ref: tests/fixtures/synthetic/guard
+      notes: Toy numbers for the rules harness only.
+  - build_type: male
+    position: SG
+    enumeration: partial
+    status: verified
+    synthetic: true
+    provenance: *prov
+bodies:
+  - id: toy_pg
+    build_type: male
+    position: PG
+    height_in: 70
+    weight_lb: 170
+    wingspan_in: 70
+    attribute_bounds:
+      - attribute_id: toy_shot
+        minimum: 10
+        maximum: 88
+      - attribute_id: toy_finish
+        minimum: 10
+        maximum: 88
+    status: verified
+    synthetic: true
+    provenance: *prov
+  - id: toy_sg
+    build_type: male
+    position: SG
+    height_in: 71
+    weight_lb: 171
+    wingspan_in: 71
+    attribute_bounds: []
+    status: verified
+    synthetic: true
+    provenance: *prov
