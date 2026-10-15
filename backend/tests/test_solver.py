@@ -501,7 +501,7 @@ def test_non_synthetic_guard_copy_returns_the_toy_recipe(
     body = response.json()
     assert body["status"] == "complete_proven"
     assert body["optimality_proven"] is True
-    assert body["optimizer_version"] == "optimizer-m2-single-body"
+    assert body["optimizer_version"] == "optimizer-m3-multi-body"
     recipe = body["recommendations"]["top"][0]
     assert recipe["name"] == "TOY_ARCHETYPE"
     assert recipe["verification"] == "verified"

@@ -77,7 +77,11 @@ class RecipeCheck:
     normal_points: int
     prioritized_unlock_misses: int
     normal_unlock_misses: int
+    required_violations: int
+    required_severity: int
+    required_unlock_misses: int
     applications_used: int
+    preference_distance: int
 
 
 def validate_recipe(
@@ -85,6 +89,9 @@ def validate_recipe(
     request: OptimizeRequest,
     query: BodyQuery,
     candidate: Candidate,
+    *,
+    enforce_requirements: bool = True,
+    preference_distance: int = 0,
 ) -> RecipeCheck:
     problems: list[str] = []
     catalog = bundle.verified_attribute_ids()
@@ -92,7 +99,8 @@ def validate_recipe(
     _check_links(bundle, candidate, catalog, problems)
     overall = _check_overall_and_name(bundle, query, candidate, problems)
     _check_breakers(bundle, request, candidate, catalog, problems)
-    _check_required_ratings(request, candidate, problems)
+    if enforce_requirements:
+        _check_required_ratings(request, candidate, problems)
 
     badges = _eligible_badges(bundle, query, candidate)
     animations = _eligible_unlocks(
@@ -111,18 +119,19 @@ def validate_recipe(
         takeover_eligibility,
         "takeovers",
     )
-    deviations, prioritized_points, normal_points = _deviations(
+    deviations, prioritized_points, normal_points, required_count, required_severity = _deviations(
         bundle,
         request,
         candidate,
         problems,
     )
-    prioritized_misses, normal_misses = _unlock_misses(
+    prioritized_misses, normal_misses, required_unlocks = _unlock_misses(
         request,
         badges,
         animations,
         takeovers,
         problems,
+        enforce_requirements=enforce_requirements,
     )
     applications = sum(item.applications for item in candidate.allocations)
     score = fit_score(
@@ -130,6 +139,8 @@ def validate_recipe(
         normal_points=normal_points,
         prioritized_unlock_misses=prioritized_misses,
         normal_unlock_misses=normal_misses,
+        required_points=required_severity,
+        required_unlock_misses=required_unlocks,
     )
     return RecipeCheck(
         problems=tuple(problems),
@@ -140,18 +151,26 @@ def validate_recipe(
         overall=overall,
         score=score,
         components=_components(
+            request,
             overall,
             prioritized_points,
             normal_points,
             prioritized_misses,
             normal_misses,
             applications,
+            required_severity,
+            required_unlocks,
+            preference_distance,
         ),
         prioritized_points=prioritized_points,
         normal_points=normal_points,
         prioritized_unlock_misses=prioritized_misses,
         normal_unlock_misses=normal_misses,
+        required_violations=required_count + required_unlocks,
+        required_severity=required_severity + required_unlocks,
+        required_unlock_misses=required_unlocks,
         applications_used=applications,
+        preference_distance=preference_distance,
     )
 
 
@@ -370,13 +389,13 @@ def _deviations(
     request: OptimizeRequest,
     candidate: Candidate,
     problems: list[str],
-) -> tuple[list[DeviationNote], int, int]:
+) -> tuple[list[DeviationNote], int, int, int, int]:
     notes: list[DeviationNote] = []
     prioritized = 0
     normal = 0
+    required_count = 0
+    required_severity = 0
     for target in request.attribute_targets:
-        if target.importance is Importance.required:
-            continue
         achieved = candidate.final.get(target.id)
         if achieved is None or achieved == target.target:
             continue
@@ -390,13 +409,16 @@ def _deviations(
             )
         )
         gap = abs(achieved - target.target)
-        if target.importance is Importance.prioritized:
+        if target.importance is Importance.required:
+            required_count += 1
+            required_severity += gap
+        elif target.importance is Importance.prioritized:
             prioritized += gap
         else:
             normal += gap
     if any(len(note.message) > 300 for note in notes):
         problems.append("A deviation note is too long to store.")
-    return notes, prioritized, normal
+    return notes, prioritized, normal, required_count, required_severity
 
 
 def _deviation_message(
@@ -429,9 +451,12 @@ def _unlock_misses(
     animations: list[EligibleUnlock],
     takeovers: list[EligibleUnlock],
     problems: list[str],
-) -> tuple[int, int]:
+    *,
+    enforce_requirements: bool,
+) -> tuple[int, int, int]:
     prioritized = 0
     normal = 0
+    required = 0
     badge_by_id = {item.id: item for item in badges}
     for badge in request.badges:
         eligible = badge_by_id.get(badge.id)
@@ -439,35 +464,41 @@ def _unlock_misses(
             eligible is not None
             and _TIER_RANK[eligible.highest_tier] >= _TIER_RANK[badge.minimum_tier]
         )
-        prioritized, normal = _count_miss(
+        prioritized, normal, required = _count_miss(
             met,
             badge.importance,
             f"Required badge {badge.id} is not eligible at {badge.minimum_tier.value}.",
             prioritized,
             normal,
+            required,
             problems,
+            enforce_requirements=enforce_requirements,
         )
     animation_ids = {item.id for item in animations}
     for animation in request.animations:
-        prioritized, normal = _count_miss(
+        prioritized, normal, required = _count_miss(
             animation.id in animation_ids,
             animation.importance,
             f"Required animation {animation.id} is not eligible.",
             prioritized,
             normal,
+            required,
             problems,
+            enforce_requirements=enforce_requirements,
         )
     takeover_ids = {item.id for item in takeovers}
     for takeover in request.takeovers:
-        prioritized, normal = _count_miss(
+        prioritized, normal, required = _count_miss(
             takeover.id in takeover_ids,
             takeover.importance,
             f"Required Takeover {takeover.id} is not eligible.",
             prioritized,
             normal,
+            required,
             problems,
+            enforce_requirements=enforce_requirements,
         )
-    return prioritized, normal
+    return prioritized, normal, required
 
 
 def _count_miss(
@@ -476,26 +507,35 @@ def _count_miss(
     required_message: str,
     prioritized: int,
     normal: int,
+    required: int,
     problems: list[str],
-) -> tuple[int, int]:
+    *,
+    enforce_requirements: bool,
+) -> tuple[int, int, int]:
     if met:
-        return prioritized, normal
+        return prioritized, normal, required
     if importance is Importance.required:
-        problems.append(required_message)
+        if enforce_requirements:
+            problems.append(required_message)
+        required += 1
     elif importance is Importance.prioritized:
         prioritized += 1
     else:
         normal += 1
-    return prioritized, normal
+    return prioritized, normal, required
 
 
 def _components(
+    request: OptimizeRequest,
     overall: int | None,
     prioritized_points: int,
     normal_points: int,
     prioritized_misses: int,
     normal_misses: int,
     applications: int,
+    required_severity: int,
+    required_unlocks: int,
+    preference_distance: int,
 ) -> tuple[ScoreComponent, ...]:
     return (
         ScoreComponent(
@@ -503,6 +543,18 @@ def _components(
             weight=0,
             value=float(overall or 0),
             note="Exact verified overall for this base vector. It is not part of the fit score.",
+        ),
+        ScoreComponent(
+            id="required_deviation",
+            weight=float(DISPLAY_PRIORITIZED_RATING),
+            value=float(required_severity),
+            note="Absolute miss on required ratings. Exact search does not allow this.",
+        ),
+        ScoreComponent(
+            id="required_unlock_miss",
+            weight=float(DISPLAY_PRIORITIZED_UNLOCK),
+            value=float(required_unlocks),
+            note="Required badge, animation, or Takeover requests that were missed.",
         ),
         ScoreComponent(
             id="prioritized_deviation",
@@ -532,6 +584,21 @@ def _components(
             id="cap_breakers_used",
             weight=0,
             value=float(applications),
-            note="Breaker count is minimized after targets. It does not change the fit score.",
+            note="Breaker count breaks ties after targets and physical preference.",
+        ),
+        ScoreComponent(
+            id="physical_preference",
+            weight=0,
+            value=float(preference_distance),
+            note=(
+                "Distance from preferred unlocked measurements. "
+                "It breaks ties after target misses and does not change the fit score."
+            ),
+        ),
+        ScoreComponent(
+            id="playstyle",
+            weight=0,
+            value=0,
+            note=(f"Playstyle {request.playstyle} is recorded and does not change rank."),
         ),
     )

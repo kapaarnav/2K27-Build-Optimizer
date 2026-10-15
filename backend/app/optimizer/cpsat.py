@@ -12,7 +12,7 @@ from enum import StrEnum
 from ortools.sat.python import cp_model
 
 from app.domain import BadgeTier, Importance, PoolKind, VerificationStatus
-from app.optimizer.scoring import ObjectiveWeights, objective_weights
+from app.optimizer.scoring import ObjectiveWeights, objective_weights, violation_weight
 from app.optimizer.validator import Allocation, Candidate
 from app.rules.engine import BodyQuery
 from app.rules.models import BadgeRule, BodyProfile, EligibilityRule, GainStep, LinkRule, RuleBundle
@@ -88,6 +88,9 @@ def solve_exact(
     max_time_seconds: float,
     reference_base: dict[str, int] | None,
     reference_apps: dict[str, int] | None,
+    excluded_bases: tuple[dict[str, int], ...] = (),
+    relax_required: bool = False,
+    penalize_excess: bool = True,
 ) -> ModelHit:
     model = cp_model.CpModel()
     names = _Names()
@@ -104,6 +107,7 @@ def solve_exact(
     }
     apps = {attr: model.NewIntVar(0, app_upper[attr], names("apps")) for attr in attrs}
     _choose_base_row(model, names, space, bases)
+    _forbid_bases(model, names, attrs, bases, excluded_bases)
     _choose_gains(model, names, attrs, steps, bases, finals, apps, app_upper)
     _add_link_closure(model, names, bases, space.bounds, bundle.links.links)
     used = _add_pools(model, names, request, space, apps, spendable)
@@ -120,6 +124,8 @@ def solve_exact(
         app_upper,
         reference_base,
         reference_apps,
+        relax_required=relax_required,
+        penalize_excess=penalize_excess,
     )
     return _read_hit(
         model,
@@ -252,6 +258,26 @@ def _final_domain(
     return lower, upper
 
 
+def _forbid_bases(
+    model: cp_model.CpModel,
+    names: _Names,
+    attrs: list[str],
+    bases: dict[str, cp_model.IntVar],
+    excluded_bases: tuple[dict[str, int], ...],
+) -> None:
+    for banned in excluded_bases:
+        differs = []
+        for attr in attrs:
+            if attr not in banned:
+                continue
+            flag = model.NewBoolVar(names("ban"))
+            model.Add(bases[attr] != banned[attr]).OnlyEnforceIf(flag)
+            model.Add(bases[attr] == banned[attr]).OnlyEnforceIf(flag.Not())
+            differs.append(flag)
+        if differs:
+            model.Add(sum(differs) >= 1)
+
+
 def _choose_base_row(
     model: cp_model.CpModel,
     names: _Names,
@@ -371,15 +397,19 @@ def _add_targets_and_unlocks(
     app_upper: dict[str, int],
     reference_base: dict[str, int] | None,
     reference_apps: dict[str, int] | None,
+    *,
+    relax_required: bool,
+    penalize_excess: bool,
 ) -> None:
     terms: list[cp_model.LinearExpr] = []
     minimums = {item.attribute_id: item.count for item in request.cap_breakers.minimum_allocations}
     for attr, count in minimums.items():
         if count > 0:
             model.Add(apps[attr] >= count)
-    for target in request.attribute_targets:
-        if target.importance is Importance.required:
-            model.Add(finals[target.id] == target.target)
+    if not relax_required:
+        for target in request.attribute_targets:
+            if target.importance is Importance.required:
+                model.Add(finals[target.id] == target.target)
 
     n_unlocks = len(request.badges) + len(request.animations) + len(request.takeovers)
     weights = objective_weights(
@@ -388,17 +418,49 @@ def _add_targets_and_unlocks(
         total_applications=sum(app_upper.values()),
         n_unlocks=n_unlocks,
     )
+    required_weight = violation_weight(
+        weights,
+        n_attributes=len(space.attribute_ids),
+        n_unlocks=n_unlocks,
+    )
     for target in request.attribute_targets:
         if target.importance is Importance.required:
+            if relax_required:
+                _penalize_required_rating(
+                    model,
+                    names,
+                    finals[target.id],
+                    target.target,
+                    required_weight,
+                    weights.prioritized,
+                    terms,
+                )
             continue
-        deviation = model.NewIntVar(0, 150, names("deviation"))
-        model.AddAbsEquality(deviation, finals[target.id] - target.target)
+        deviation = _soft_deviation(
+            model,
+            names,
+            finals[target.id],
+            target.target,
+            penalize_excess,
+        )
         weight = (
             weights.prioritized if target.importance is Importance.prioritized else weights.normal
         )
         terms.append(deviation * weight)
 
-    _penalize_unlocks(model, names, bundle, request, space, bases, finals, weights, terms)
+    _penalize_unlocks(
+        model,
+        names,
+        bundle,
+        request,
+        space,
+        bases,
+        finals,
+        weights,
+        terms,
+        relax_required=relax_required,
+        required_weight=required_weight,
+    )
     if reference_base is not None and reference_apps is not None:
         for attr in space.attribute_ids:
             base_gap = model.NewIntVar(0, 150, names("reference_base"))
@@ -420,6 +482,39 @@ def _add_targets_and_unlocks(
     model.Minimize(total)
 
 
+def _soft_deviation(
+    model: cp_model.CpModel,
+    names: _Names,
+    final: cp_model.IntVar,
+    target: int,
+    penalize_excess: bool,
+) -> cp_model.IntVar:
+    deviation = model.NewIntVar(0, 150, names("deviation"))
+    if penalize_excess:
+        model.AddAbsEquality(deviation, final - target)
+        return deviation
+    model.Add(deviation >= target - final)
+    return deviation
+
+
+def _penalize_required_rating(
+    model: cp_model.CpModel,
+    names: _Names,
+    final: cp_model.IntVar,
+    target: int,
+    required_weight: int,
+    severity_weight: int,
+    terms: list[cp_model.LinearExpr],
+) -> None:
+    gap = model.NewIntVar(0, 150, names("required_gap"))
+    model.AddAbsEquality(gap, final - target)
+    missed = model.NewBoolVar(names("required_miss"))
+    model.Add(gap >= 1).OnlyEnforceIf(missed)
+    model.Add(gap == 0).OnlyEnforceIf(missed.Not())
+    terms.append(missed * required_weight)
+    terms.append(gap * severity_weight)
+
+
 def _penalize_unlocks(
     model: cp_model.CpModel,
     names: _Names,
@@ -430,6 +525,9 @@ def _penalize_unlocks(
     finals: dict[str, cp_model.IntVar],
     weights: ObjectiveWeights,
     terms: list[cp_model.LinearExpr],
+    *,
+    relax_required: bool,
+    required_weight: int,
 ) -> None:
     for badge in request.badges:
         rules = _covering(bundle.eligibility.badges, badge.id, space)
@@ -443,13 +541,39 @@ def _penalize_unlocks(
             badge.importance,
             weights,
             terms,
+            relax_required=relax_required,
+            required_weight=required_weight,
         )
     for animation in request.animations:
         rules = _covering(bundle.eligibility.animations, animation.id, space)
-        _one_unlock(model, names, rules, bases, finals, None, animation.importance, weights, terms)
+        _one_unlock(
+            model,
+            names,
+            rules,
+            bases,
+            finals,
+            None,
+            animation.importance,
+            weights,
+            terms,
+            relax_required=relax_required,
+            required_weight=required_weight,
+        )
     for takeover in request.takeovers:
         rules = _covering(bundle.eligibility.takeovers, takeover.id, space)
-        _one_unlock(model, names, rules, bases, finals, None, takeover.importance, weights, terms)
+        _one_unlock(
+            model,
+            names,
+            rules,
+            bases,
+            finals,
+            None,
+            takeover.importance,
+            weights,
+            terms,
+            relax_required=relax_required,
+            required_weight=required_weight,
+        )
 
 
 def _one_unlock(
@@ -462,8 +586,11 @@ def _one_unlock(
     importance: Importance,
     weights: ObjectiveWeights,
     terms: list[cp_model.LinearExpr],
+    *,
+    relax_required: bool,
+    required_weight: int,
 ) -> None:
-    if importance is Importance.required:
+    if importance is Importance.required and not relax_required:
         _require_unlock(model, names, rules, bases, finals, minimum_tier)
         return
     choices = _unlock_choices(model, names, rules, bases, finals, minimum_tier)
@@ -474,7 +601,12 @@ def _one_unlock(
             model.AddImplication(choice, missed.Not())
     else:
         model.Add(missed == 1)
-    weight = weights.prioritized if importance is Importance.prioritized else weights.unlock_normal
+    if importance is Importance.required:
+        weight = required_weight
+    elif importance is Importance.prioritized:
+        weight = weights.prioritized
+    else:
+        weight = weights.unlock_normal
     terms.append(missed * weight)
 
 

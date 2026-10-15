@@ -13,6 +13,11 @@ badges:
         height_in: 70
         weight_lb: 170
         wingspan_in: 70
+      - build_type: male
+        position: PG
+        height_in: 74
+        weight_lb: 190
+        wingspan_in: 76
     status: verified
     synthetic: true
     provenance: &prov
@@ -35,6 +40,11 @@ animations:
         height_in: 70
         weight_lb: 170
         wingspan_in: 70
+      - build_type: male
+        position: PG
+        height_in: 74
+        weight_lb: 190
+        wingspan_in: 76
     status: verified
     synthetic: true
     provenance: *prov
@@ -52,6 +62,11 @@ takeovers:
         height_in: 70
         weight_lb: 170
         wingspan_in: 70
+      - build_type: male
+        position: PG
+        height_in: 74
+        weight_lb: 190
+        wingspan_in: 76
     status: verified
     synthetic: true
     provenance: *prov

@@ -13,9 +13,54 @@ observations:
     overall: 70
     status: verified
     synthetic: true
-    provenance:
+    provenance: &prov
       source: Synthetic fixture. Not an NBA 2K27 observation.
       observed_at: 2026-01-01
       source_app_version: synthetic
       evidence_ref: tests/fixtures/synthetic/guard
       notes: Toy numbers for the rules harness only.
+  - id: toy_pg_plus
+    build_type: male
+    position: PG
+    height_in: 70
+    weight_lb: 170
+    wingspan_in: 70
+    base_attributes:
+      - id: toy_shot
+        rating: 80
+      - id: toy_finish
+        rating: 50
+    overall: 72
+    status: verified
+    synthetic: true
+    provenance: *prov
+  - id: toy_pg_tall_exact
+    build_type: male
+    position: PG
+    height_in: 74
+    weight_lb: 190
+    wingspan_in: 76
+    base_attributes:
+      - id: toy_shot
+        rating: 80
+      - id: toy_finish
+        rating: 40
+    overall: 68
+    status: verified
+    synthetic: true
+    provenance: *prov
+  - id: toy_pg_tall_low
+    build_type: male
+    position: PG
+    height_in: 74
+    weight_lb: 190
+    wingspan_in: 76
+    base_attributes:
+      - id: toy_shot
+        rating: 70
+      - id: toy_finish
+        rating: 40
+    overall: 60
+    status: verified
+    synthetic: true
+    provenance: *prov

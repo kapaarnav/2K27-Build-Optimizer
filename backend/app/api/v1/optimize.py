@@ -12,10 +12,11 @@ router = APIRouter(tags=["optimize"])
 
 @router.post("/optimize", response_model=OptimizeResponse)
 def optimize_build(body: OptimizeRequest, request: Request) -> OptimizeResponse:
-    """Search one locked body outside the event loop.
+    """Search verified bodies outside the event loop.
 
-    FastAPI runs this synchronous handler on a threadpool. The shipped ruleset
-    has no verified coverage, so the response stays unsupported.
+    FastAPI runs this synchronous handler on a threadpool. One request shares
+    one deadline across bodies. The shipped ruleset has no verified coverage,
+    so the response stays unsupported.
     """
 
     ruleset: ActiveRuleset = request.app.state.ruleset

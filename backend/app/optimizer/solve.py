@@ -56,6 +56,7 @@ from app.schemas.optimize import (
     RecommendationSet,
     RequirementConflict,
     ScoreBreakdown,
+    UnmetRequirement,
     UnsupportedOptimizeResponse,
 )
 
@@ -81,6 +82,16 @@ class SolveBudget:
     def expired(self) -> bool:
         return self.deadline is not None and time.monotonic() >= self.deadline
 
+    def remaining(self) -> float:
+        if self.deadline is None:
+            return self.max_time_seconds
+        return max(0.0, self.deadline - time.monotonic())
+
+    def started(self) -> "SolveBudget":
+        if self.deadline is not None:
+            return self
+        return SolveBudget(self.max_time_seconds, time.monotonic() + self.max_time_seconds)
+
 
 @dataclass(frozen=True)
 class Outcome:
@@ -91,6 +102,9 @@ class Outcome:
     missing_mechanics: tuple[str, ...]
     conflicts: tuple[RequirementConflict, ...]
     recommendation: Recommendation | None
+    recommendations: tuple[Recommendation, ...] = ()
+    alternatives: tuple[Recommendation, ...] = ()
+    unmet: tuple[UnmetRequirement, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -187,6 +201,12 @@ def response_from_outcome(
     request_id: str,
     elapsed_ms: int,
 ) -> OptimizeResponse:
+    if outcome.recommendations:
+        top = list(outcome.recommendations)
+    elif outcome.recommendation is not None:
+        top = [outcome.recommendation]
+    else:
+        top = []
     shared = {
         "request_id": request_id,
         "ruleset_id": ruleset.manifest.ruleset_id,
@@ -200,9 +220,8 @@ def response_from_outcome(
         ),
         "warnings": list(outcome.warnings),
         "cache": CacheInfo(hit=False),
-        "recommendations": RecommendationSet(
-            top=[outcome.recommendation] if outcome.recommendation is not None else []
-        ),
+        "recommendations": RecommendationSet(top=top, alternatives=list(outcome.alternatives)),
+        "unmet_requirements": list(outcome.unmet),
     }
     if outcome.status in ("complete_proven", "partial_feasible"):
         return FeasibleOptimizeResponse(
@@ -726,10 +745,7 @@ def _unsupported(messages: tuple[str, ...], mechanics: tuple[str, ...]) -> Outco
 
 
 def _infeasible(conflicts: tuple[RequirementConflict, ...]) -> Outcome:
-    warning = (
-        "Verified rules prove this request cannot be met. "
-        "A closest build is not searched in this version."
-    )
+    warning = "Verified rules prove this request cannot be met."
     return Outcome(
         status="infeasible_proven",
         optimality_proven=True,

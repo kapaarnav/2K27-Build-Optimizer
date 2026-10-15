@@ -9,7 +9,7 @@ class Settings(BaseSettings):
 
     database_url: str = "postgresql+psycopg://optimizer:optimizer@localhost:5432/optimizer"
     cors_origins: str = "http://localhost:5173"
-    # Search budget for one locked body. Not a game-rule number.
+    # Shared deadline for one multi-body search. Not a game-rule number.
     solver_max_seconds: float = Field(default=2.0, gt=0, le=30)
 
     @property

@@ -2,7 +2,8 @@ import time
 from dataclasses import dataclass
 
 from app.domain import MECHANIC_FIELDS, OPTIMIZER_VERSION, SCORING_VERSION
-from app.optimizer.solve import SolveBudget, response_from_outcome, solve_locked_body
+from app.optimizer.portfolio import search_bodies
+from app.optimizer.solve import SolveBudget, response_from_outcome
 from app.rules.engine import RuleFinding, audit_request
 from app.rules.loader import ActiveRuleset
 from app.schemas.optimize import (
@@ -171,13 +172,13 @@ def plan_optimize(
     request_id: str,
     budget: SolveBudget,
 ) -> OptimizeResponse:
-    """Return unsupported when coverage is missing, otherwise solve one body."""
+    """Return unsupported when coverage is missing, otherwise search matching bodies."""
 
     started = time.perf_counter()
     assessment = assess_request(ruleset, request)
     if not assessment.decision.supported:
         elapsed_ms = int((time.perf_counter() - started) * 1000)
         return unsupported_optimize(ruleset, assessment.decision, request_id, elapsed_ms)
-    outcome = solve_locked_body(ruleset.bundle, request, budget)
+    outcome = search_bodies(ruleset.bundle, request, budget)
     elapsed_ms = int((time.perf_counter() - started) * 1000)
     return response_from_outcome(outcome, ruleset, request_id, elapsed_ms)

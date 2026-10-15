@@ -33,6 +33,22 @@ bodies:
     status: verified
     synthetic: true
     provenance: *prov
+  - id: toy_pg_tall
+    build_type: male
+    position: PG
+    height_in: 74
+    weight_lb: 190
+    wingspan_in: 76
+    attribute_bounds:
+      - attribute_id: toy_shot
+        minimum: 10
+        maximum: 88
+      - attribute_id: toy_finish
+        minimum: 10
+        maximum: 88
+    status: verified
+    synthetic: true
+    provenance: *prov
   - id: toy_sg
     build_type: male
     position: SG
